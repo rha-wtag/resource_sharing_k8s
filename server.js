@@ -6,7 +6,8 @@ const sequelize = require('sequelize')
 const dotenv = require('dotenv').config()
 const cookieParser = require('cookie-parser')
 const multer = require('multer')
-const path = require('path')
+const path = require('path');
+const fs = require('fs');
 
 const pool = require('./db');
 
@@ -29,9 +30,21 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
+const initDatabase = async () => {
+    try {
+        const userTableSql = fs.readFileSync(path.join(__dirname, 'initDB.sql'), 'utf8');
+        await pool.query(userTableSql);
+
+        console.log("Database initialized successfully.");
+    } catch (err) {
+        console.error("Error initializing database:", err);
+    }
+};
+
 pool.query("SELECT 1")
-    .then(() => {
-        console.log('db connection successful')
+    .then(async () => {
+        console.log('db connection successful');
+        await initDatabase();
         app.listen(PORT,
             () => console.log(`Server is connected on ${PORT}`))
     })
