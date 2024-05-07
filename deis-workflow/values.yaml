@@ -1,0 +1,37 @@
+
+server:
+  replicaCount: 1
+  image:
+    repository: rakindocker/file_sharing_api
+    tag: 0.1
+  service:
+    type: ClusterIP
+    port: 3000
+  environment:
+    PORT: '3000'
+    JWT_SECRET: sdjbfjksbdhfjkhsdkjfhksjdhfkjhsdkfjhskjh
+    DB_USER: postgres
+    DB_HOST: postgres-cluster-ip-service
+    DB_PORT: '5432'
+    DB_NAME: postgres
+  secret:
+    DB_PASSWORD:
+      secretName: pgpassword
+      key: PGPASSWORD
+      value: "asdasdasda"
+
+ingress:
+  className: "nginx"
+  paths:
+    - path: /
+      pathType: Prefix
+      service:
+        name: server-cluster-ip-service
+        port: 3000
+
+database:
+  pvc:
+    name: database-persistent-volume-claim
+    accessModes:
+      - ReadWriteOnce
+    storage: 2Gi

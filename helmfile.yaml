@@ -1,0 +1,7 @@
+releases:
+  - name: resource-sharing-app
+    namespace: express-resource-sharing
+    chart: ./deis-workflow/
+    version: 0.1.0
+    values:
+      - deis-workflow/values.yaml

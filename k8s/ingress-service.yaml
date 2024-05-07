@@ -14,3 +14,4 @@ spec:
                 name: server-cluster-ip-service
                 port:
                   number: 3000
+ 

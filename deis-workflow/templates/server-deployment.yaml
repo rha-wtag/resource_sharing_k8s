@@ -1,0 +1,39 @@
+# templates/server-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+spec:
+  replicas: {{ .Values.server.replicaCount }}
+  selector:
+    matchLabels:
+      component: server
+  template:
+    metadata:
+      labels:
+        component: server 
+    spec:
+      containers:
+        - name: server
+          image: {{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}
+          ports:
+            - containerPort: {{ .Values.server.service.port }}
+          env:
+            - name: PORT
+              value: "{{ .Values.server.environment.PORT }}"
+            - name: JWT_SECRET
+              value: "{{ .Values.server.environment.JWT_SECRET }}"
+            - name: DB_USER
+              value: "{{ .Values.server.environment.DB_USER }}"
+            - name: DB_HOST
+              value: "{{ .Values.server.environment.DB_HOST }}"
+            - name: DB_PORT
+              value: "{{ .Values.server.environment.DB_PORT }}"
+            - name: DB_NAME
+              value: "{{ .Values.server.environment.DB_NAME }}"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.server.secret.DB_PASSWORD.secretName }}
+                  key: {{ .Values.server.secret.DB_PASSWORD.key }}

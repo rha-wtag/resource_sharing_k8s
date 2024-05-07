@@ -1,21 +1,24 @@
+# templates/postgres-statefulset.yaml
+
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: postgres-deployment
+  name: {{ .Release.Name }}-postgres
 spec:
+  serviceName: postgres-cluster-ip-service
   replicas: 1
   selector:
     matchLabels:
-      component: postgres
+      app: {{ .Release.Name }}-postgres
   template:
     metadata:
       labels:
-        component: postgres
+        app: {{ .Release.Name }}-postgres
     spec:
       volumes:
-        - name: postgres-storage 
+        - name: postgres-storage
           persistentVolumeClaim:
-            claimName: database-persistent-volume-claim
+            claimName: {{ .Values.database.pvc.name }}
       containers:
         - name: postgres
           image: postgres
@@ -25,8 +28,8 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: pgpassword
-                  key: PGPASSWORD
+                  name: {{ .Values.server.secret.DB_PASSWORD.secretName }}
+                  key: {{ .Values.server.secret.DB_PASSWORD.key }}
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data

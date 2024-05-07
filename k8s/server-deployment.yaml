@@ -10,8 +10,8 @@ spec:
   template:
     metadata:
       labels:
-        component: server
-    spec:
+        component: server 
+    spec: 
       containers:
         - name: server
           image: rakindocker/file_sharing_api:0.1 
