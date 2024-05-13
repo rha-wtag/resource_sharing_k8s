@@ -1,26 +1,69 @@
+# version: '3.8'
+# services:
+#   app:
+#     container_name: express_app_fullstack
+#     restart: always
+#     build: .
+#     ports:
+#       - "3000:3000"
+#     depends_on:
+#       - postgres_db2
+#     # command: ["sh", "-c", "./wait-for-it.sh db:3306 -- npm start"]
+#     entrypoint: ["./wait-for-it.sh", "postgres_db2:5432", "--", "npm", "start"]
+#     # command: [ "npm", "start" ]
+#     # command: ["sh", "-c", "./wait-for-it.sh -t db:3306 -- npm start"]
+#     environment:
+#       - DB_HOST=postgres_db2
+#       - DB_USER=postgres
+#       - DB_PASSWORD=1234
+#       - DB_NAME=Resource_sharing
+#     networks:
+#       - my_network
+#   postgres_db2:
+#     container_name: postgres_db2
+#     image: postgres:latest
+#     restart: always
+#     environment:
+#       POSTGRES_DB: 'Resource_sharing'
+#       POSTGRES_USER: 'postgres'
+#       POSTGRES_PASSWORD: '1234'
+#     ports:
+#       - "5433:5432"
+#     volumes:
+#       - db_data:/var/lib/postgresql/data
+#       - ./initDB.sql:/docker-entrypoint-initdb.d/init-db.sql
+#     networks:
+#       - my_network
+# volumes:
+#   db_data:
+
+# networks:
+#   my_network:
+#     driver: bridge
+
 version: '3.8'
 services:
-  app:
-    container_name: express_app_fullstack
+  express_app_fullstack3:
+    container_name: express_app_fullstack3
     restart: always
     build: .
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
-      - postgres_db2
+      - postgres_db3
     # command: ["sh", "-c", "./wait-for-it.sh db:3306 -- npm start"]
-    entrypoint: ["./wait-for-it.sh", "postgres_db2:5432", "--", "npm", "start"]
+    entrypoint: ["./wait-for-it.sh", "postgres_db3:5432", "--", "npm", "start"]
     # command: [ "npm", "start" ]
     # command: ["sh", "-c", "./wait-for-it.sh -t db:3306 -- npm start"]
     environment:
-      - DB_HOST=postgres_db2
+      - DB_HOST=postgres_db3
       - DB_USER=postgres
       - DB_PASSWORD=1234
       - DB_NAME=Resource_sharing
     networks:
       - my_network
-  postgres_db2:
-    container_name: postgres_db2
+  postgres_db3:
+    container_name: postgres_db3
     image: postgres:latest
     restart: always
     environment:
@@ -28,14 +71,34 @@ services:
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: '1234'
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./initDB.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - my_network
+  prom-server:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    depends_on:
+      - express_app_fullstack3
+    volumes:
+      - ./prometheus-config.yml:/etc/prometheus/prometheus.
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3002:3000"
+    depends_on:
+      - prom-server
+    volumes:
+      - grafana-data:/var/lib/grafana
+    # environment:
+    #   GF_SECURITY_ADMIN_PASSWORD: "securepassword"  # You can change this to the password you prefer
+    #   GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
 volumes:
   db_data:
+  grafana-data:
 
 networks:
   my_network:

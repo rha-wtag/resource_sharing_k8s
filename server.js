@@ -9,6 +9,8 @@ const multer = require('multer')
 const path = require('path');
 const fs = require('fs');
 
+const client =  require("prom-client")
+
 const pool = require('./db');
 
 const loginRouter = require('./Routes/loginRouter');
@@ -16,7 +18,9 @@ const fileUploadRouter = require('./Routes/uploadRouter');
 const fileDownloadRouter = require('./Routes/uploadRouter');
 const registerRouter = require('./Routes/registerRouter')
 
+const collectDeafultMetrics = client.collectDefaultMetrics;
 
+collectDeafultMetrics({register: client.register})
 
 /////////
 const {authenticateToken} = require('./Middlewares/tokenAuthenticateMiddleware')
@@ -107,6 +111,12 @@ app.post("/login", async (req,res)=>{
 app.get('/dashboard', authenticateToken, (req, res) => {
     res.status(200).json({ message: "Welcome to the Dashboard", user: req.user });
 });
+
+app.get('/metrics',async(req,res)=>{
+    res.setHeader('Content-Type',client.register.contentType)
+    const metrics = await client.register.metrics();
+    res.send(metrics);
+})
 
 const storage = multer.memoryStorage({
     filename: (req,file,cb) =>{
